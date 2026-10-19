@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>𓂀</text></svg>" />
+<script disable-devtool-auto src="https://cdn.jsdelivr.net/npm/disable-devtool@0.3.7"></script>
+<title>كل الفلاتر</title>
+<style>
+:root{color-scheme:dark;--bg:#080d17;--panel:#111b2b;--panel2:#0b1422;--line:#293a52;--text:#eef5ff;--muted:#a9bad1;--cyan:#61ddff;--green:#8be7bd;--gold:#ffd780}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(ellipse at 50% 0,#172c4b 0,#080d17 55%);color:var(--text);font:16px/1.9 "Segoe UI",Tahoma,Arial,sans-serif}
+header{padding:38px 18px 28px;text-align:center;border-bottom:1px solid var(--line)}
+header span{display:inline-block;border:1px solid #2c6177;border-radius:30px;padding:2px 13px;color:var(--cyan);font-size:.88rem}
+h1{font-size:clamp(1.8rem,5vw,2.8rem);line-height:1.35;margin:12px 0}
+header p{max-width:760px;margin:auto;color:var(--muted)}
+main{width:min(980px,calc(100% - 26px));margin:24px auto 60px}
+.panel,.filter{border:1px solid var(--line);background:linear-gradient(145deg,var(--panel),#0d1522);border-radius:16px;padding:20px;margin:17px 0}
+.panel{border-right:4px solid var(--cyan)}
+h2{margin:0 0 10px;font-size:1.4rem;color:var(--cyan)}
+h3{margin:0 0 7px;font-size:1.1rem}
+p{margin:8px 0}
+.muted{color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:12px 0}
+.tile{border:1px solid var(--line);background:#142238;padding:12px;border-radius:11px}
+code,pre{font-family:Consolas,"Courier New",monospace;direction:ltr;text-align:left}
+code{color:#a9eeff;background:#07101c;border:1px solid #263951;border-radius:5px;padding:1px 5px}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;color:#d2f4ff;background:#070d16;border:1px solid #263951;padding:13px;border-radius:10px;overflow-x:auto}
+.formula{direction:ltr;text-align:center;color:var(--gold);background:#0a1320;border:1px dashed #3b506b;padding:10px;border-radius:9px;margin:12px 0;font:600 1.08rem Consolas,monospace}
+.example{color:var(--green);font-weight:700}
+.answer{background:#0b2025;border:1px solid #24545c;border-radius:10px;padding:12px;margin-top:13px}
+.answer b{color:var(--green)}
+.label{display:inline-block;color:var(--cyan);background:#103044;border-radius:20px;padding:0 9px;font-size:.8rem;margin-left:5px}
+.tools{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}
+input{flex:1;min-width:180px;background:#0a1422;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:10px;font:inherit}
+button{background:#14263e;color:var(--text);border:1px solid #34506d;border-radius:10px;padding:9px 13px;font:inherit;cursor:pointer}
+button:hover{border-color:var(--cyan)}
+.filter[hidden]{display:none}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 13px;margin:12px 0;background:var(--panel2)}
+summary{cursor:pointer;color:var(--gold);font-weight:700}
+.tablewrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th,td{text-align:right;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--cyan)}
+footer{text-align:center;color:var(--muted);padding:20px}
+@media(max-width:600px){.panel,.filter{padding:15px}header{padding-top:27px}body{font-size:15px}}
+@media print{body{background:white;color:#111}.panel,.filter,.tile,details{background:white;color:#111;box-shadow:none;border-color:#aaa}h2,header p,.muted{color:#333}pre,code{color:#111;background:#f5f5f5}.answer{background:#f1fff7;color:#111}.tools{display:none}}
+</style>
+</head>
+<body>
+<header>
+<span>مراجعة C++ • Image Processing</span>
+<h1>فلاتر الصور - قل حاقه</h1>
+<p>كل فلتر في قسم لوحده: فكرته، بيعمل إيه في كل بكسل، مثال</p>
+</header>
+<main>
+<section class="panel">
+<h2>أولًا: افهم البكسل قبل الفلاتر</h2>
+<p>الصورة عبارة عن نقط صغيرة اسمها <b>Pixels</b>. كل بكسل ملون عنده 3 قنوات: أحمر <b>R</b>، أخضر <b>G</b>، وأزرق <b>B</b>. قيمة كل قناة من 0 لحد 255.</p>
+<div class="grid">
+<div class="tile"><b>R — Red</b><br><span class="muted">رقم القناة في الكود: 0</span></div>
+<div class="tile"><b>G — Green</b><br><span class="muted">رقم القناة في الكود: 1</span></div>
+<div class="tile"><b>B — Blue</b><br><span class="muted">رقم القناة في الكود: 2</span></div>
+</div>
+<pre>img.getPixel(x, y, channel); // بقرأ قيمة القناة
+img.setPixel(x, y, channel, value); // بغيّر قيمة القناة</pre>
+<p><code>x</code> مكان البكسل بالعرض، و<code>y</code> مكانه بالطول. يعني <code>getPixel</code> قراءة، و<code>setPixel</code> تعديل.</p>
+</section>
+
+<div class="tools">
+<input id="search" type="search" placeholder="اكتب اسم فلتر أو كلمة عشان توصله بسرعة">
+<button id="openAll">افتح كل الأقسام</button>
+<button id="closeAll">اقفل كل الأقسام</button>
+<button onclick="window.print()">طباعة / حفظ PDF</button>
+</div>
+
+<section class="filter" data-search="1 grayscale رمادي متوسط rgb">
+<h2>فلتر 1 — Grayscale <span class="label">درجات الرمادي</span></h2>
+<p><b>الفكرة:</b> بنحسب متوسط الأحمر والأخضر والأزرق، وبنحط نفس الرقم في القنوات التلاتة. كده اللون يتحول لدرجة رمادي.</p>
+<div class="formula">Gray = (R + G + B) / 3</div>
+<pre>unsigned char avg = (r + g + b) / 3;
+img.setPixel(i, j, 0, avg);
+img.setPixel(i, j, 1, avg);
+img.setPixel(i, j, 2, avg);</pre>
+<p class="example">مثال: (200, 100, 50) → (116, 116, 116)</p>
+<p>النتيجة 116 لأن C++ هنا بتعمل قسمة أعداد صحيحة، فبتشيل الجزء العشري.</p>
+<div class="answer"><b>تقول للدكتور:</b> «بجيب متوسط قنوات RGB لكل بكسل، وبخلي القنوات التلاتة بنفس القيمة، فالصورة تتحول لدرجات رمادي».</div>
+<details><summary>سؤال ممكن يتسأل: ليه القنوات التلاتة نفس الرقم؟</summary><p>لأن اللون الرمادي مفيهوش قناة لونية غالبة؛ لما R وG وB يبقوا متساويين، البكسل بيظهر بدرجة رمادي.</p></details>
+</section>
+
+<section class="filter" data-search="2 black white أبيض أسود threshold">
+<h2>فلتر 2 — Black and White <span class="label">أبيض وأسود</span></h2>
+<p><b>الفكرة:</b> بنحسب متوسط RGB، وبعدها بنقارنه برقم اسمه Threshold، وهو 124 في الكود.</p>
+<pre>if (avg >= 124) avg = 255;
+else avg = 0;</pre>
+<ul><li>لو المتوسط 124 أو أكتر: البكسل أبيض <code>(255,255,255)</code>.</li><li>لو أقل من 124: البكسل أسود <code>(0,0,0)</code>.</li></ul>
+<div class="answer"><b>تقول للدكتور:</b> «ده Binary Thresholding؛ كل بكسل بيتحول يا أبيض يا أسود حسب متوسط شدته، والحد الفاصل عندنا 124».</div>
+<details><summary>الفرق بينه وبين Grayscale؟</summary><p>Grayscale فيه درجات رمادي كتير، لكن Black and White هنا فيه نتيجتين بس: 0 أو 255.</p></details>
+</section>
+
+<section class="filter" data-search="3 invert عكس الألوان negative">
+<h2>فلتر 3 — Invert <span class="label">عكس الألوان</span></h2>
+<p><b>الفكرة:</b> بنطرح كل قناة لونية من 255.</p>
+<div class="formula">New = 255 − Old</div>
+<pre>img.setPixel(i, j, k, 255 - img.getPixel(i, j, k));</pre>
+<p class="example">مثال: (200, 100, 50) → (55, 155, 205)</p>
+<div class="answer"><b>تقول للدكتور:</b> «بعمل Color Negative بطرح قيمة كل قناة من الحد الأقصى 255؛ الأسود يبقى أبيض والأبيض يبقى أسود».</div>
+</section>
+
+<section class="filter" data-search="4 frame إطار fancy">
+<h2>فلتر 4 — Frame <span class="label">إضافة إطار</span></h2>
+<p><b>الفكرة:</b> مش بنعدل كل بكسل في الصورة الأصلية؛ بنعمل صورة جديدة أكبر، نملأها أبيض، وبعدها ننسخ الصورة الأصلية جواها.</p>
+<pre>int thickness = 25;
+int newW = oldW + 2 * thickness;
+int newH = oldH + 2 * thickness;
+Image framed(newW, newH);</pre>
+<ul><li>سمك الإطار 25 بكسل من كل ناحية.</li><li>العرض الجديد = العرض القديم + 50، والارتفاع الجديد = الارتفاع القديم + 50.</li><li>الصورة الأصلية بتبدأ عند إحداثيات فيها إزاحة 25 بكسل من فوق ومن الشمال.</li><li>لو اخترت Fancy، الكود بيضيف زخارف سوداء في 3 زوايا من الإطار.</li></ul>
+<div class="answer"><b>تقول للدكتور:</b> «بعمل Canvas جديدة أكبر من الصورة، بخلفية بيضا، وبنسخ الصورة الأصلية جواها، ولو اختار الإطار المزخرف بضيف تفاصيل سوداء».</div>
+</section>
+
+<section class="filter" data-search="5 flip قلب أفقي رأسي horizontal vertical">
+<h2>فلتر 5 — Flip <span class="label">قلب الصورة</span></h2>
+<p><b>الفكرة:</b> بنبدّل أماكن البكسلات المتقابلة، لكن لون كل بكسل نفسه مبيتغيرش.</p>
+<div class="grid">
+<div class="tile"><h3>Horizontal — أفقي (h)</h3><p>البكسل عند <code>x</code> يتبدّل مع البكسل عند <code>width - 1 - x</code> في نفس الصف.</p></div>
+<div class="tile"><h3>Vertical — رأسي (v)</h3><p>البكسل في الصف <code>y</code> يتبدّل مع الصف <code>height - 1 - y</code>.</p></div>
+</div>
+<p>بنلف لحد نص العرض أو الارتفاع بس، عشان ما نبدلش نفس البكسلات مرتين.</p>
+<div class="answer"><b>تقول للدكتور:</b> «بعمل swapping للبكسلات المتقابلة؛ الأفقي بيعكس ترتيب الأعمدة، والرأسي بيعكس ترتيب الصفوف، مع الحفاظ على قيم RGB».</div>
+</section>
+
+<section class="filter" data-search="6 rotate تدوير 90 180 270 coordinates">
+<h2>فلتر 6 — Rotate <span class="label">تدوير الصورة</span></h2>
+<p><b>الفكرة:</b> بنعمل صورة جديدة وننقل كل بكسل لمكان جديد حسب زاوية التدوير.</p>
+<div class="grid">
+<div class="tile"><b>90 درجة</b><pre>newX = height - 1 - y;
+newY = x;</pre></div>
+<div class="tile"><b>180 درجة</b><pre>newX = width - 1 - x;
+newY = height - 1 - y;</pre></div>
+<div class="tile"><b>270 درجة</b><pre>newX = y;
+newY = width - 1 - x;</pre></div>
+</div>
+<p>في تدوير 90 أو 270 درجة، العرض الجديد بياخد الارتفاع القديم، والارتفاع الجديد بياخد العرض القديم.</p>
+<div class="answer"><b>تقول للدكتور:</b> «بستخدم Coordinate Mapping؛ بحسب الإحداثيات الجديدة لكل بكسل حسب زاوية التدوير، وبنقل قيم RGB زي ما هي».</div>
+<p class="muted">في الكود ده، 90 درجة مع عقارب الساعة، و270 درجة عكس عقارب الساعة.</p>
+</section>
+
+<section class="filter" data-search="7 darken lighten تغميق تفتيح brightness">
+<h2>فلتر 7 — Darken and Lighten <span class="label">تغميق وتفتيح</span></h2>
+<p><b>التغميق:</b> بنقسم كل قناة على 2.</p>
+<pre>val = val / 2;</pre>
+<p class="example">مثال: (200, 100, 50) → (100, 50, 25)</p>
+<p><b>التفتيح:</b> بنضرب كل قناة في 1.5، ولو عدت 255 بنثبتها عند 255.</p>
+<pre>val = min(255, (int)(val * 1.5));</pre>
+<p class="example">مثال: (200, 100, 50) → (255, 150, 75)</p>
+<div class="answer"><b>تقول للدكتور:</b> «بغير الـ Brightness بضرب قنوات اللون في معامل؛ 0.5 للتغميق و1.5 للتفتيح، وبمنع القيمة تعدي 255».</div>
+</section>
+
+<section class="filter" data-search="8 resize تغيير الحجم nearest neighbor">
+<h2>فلتر 8 — Resize <span class="label">تغيير الحجم</span></h2>
+<p><b>الفكرة:</b> بنعمل صورة جديدة بالمقاس المطلوب، ولكل بكسل جديد بنحسب مكان يقابله في الصورة القديمة، وننسخ لونه.</p>
+<pre>double xRatio = (double)img.width / newW;
+double yRatio = (double)img.height / newH;
+int srcx = min(img.width - 1, (int)(i * xRatio));
+int srcy = min(img.height - 1, (int)(j * yRatio));</pre>
+<p>دي طريقة اسمها <b>Nearest Neighbor</b> تقريبًا: بتختار بكسل من الصورة الأصلية بدل ما تمزج ألوان جيرانه. عشان كده التكبير ممكن يبان مربعات أو أقل نعومة.</p>
+<div class="answer"><b>تقول للدكتور:</b> «بحدد نسبة التحويل بين أبعاد الصورة القديمة والجديدة، وبحوّل إحداثيات كل بكسل جديد لمكان في الصورة الأصلية وأنسخ اللون منه».</div>
+</section>
+
+<section class="filter" data-search="9 10 merge دمج صورتين average blending">
+<h2>فلتر 9 — Merge <span class="label">دمج صورتين</span></h2>
+<p><b>الفكرة:</b> كل بكسل في الناتج بياخد متوسط لون البكسل المقابل ليه في الصورتين.</p>
+<div class="formula">New channel = (Image1 + Image2) / 2</div>
+<pre>int val = (img1.getPixel(i, j, k) +
+           img2.getPixel(i, j, k)) / 2;
+merged.setPixel(i, j, k, val);</pre>
+<p class="example">مثال: (200,100,50) مع (100,200,150) → (150,150,100)</p>
+<p>لو المقاسات مختلفة، البرنامج بيديك اختيارين:</p>
+<ul><li><b>Resize:</b> بيخلي الصورتين على أكبر عرض وأكبر ارتفاع فيهم، وبعدها يدمجهم.</li><li><b>Crop:</b> بيقص الصورتين لأصغر عرض وأصغر ارتفاع فيهم، والقص في الكود بيبدأ من ناحية الركن السفلي اليمين.</li></ul>
+<div class="answer"><b>تقول للدكتور:</b> «بعمل Average Blending، يعني بحسب متوسط كل قناة RGB بين الصورتين. ولو المقاسات مختلفة بوحدها بالـ Resize أو Crop الأول».</div>
+<p class="muted">ملحوظة: اختيار Resize أو Crop بيعدل الصور الموجودة في الذاكرة نفسها قبل الدمج.</p>
+</section>
+
+<section class="filter" data-search="10 11 edges edge detection الحواف threshold">
+<h2>فلتر 10 — Image Edges <span class="label">اكتشاف الحواف</span></h2>
+<p><b>الفكرة:</b> بنحوّل نسخة من الصورة لرمادي، وبعدها نقارن كل بكسل بالبكسل اللي على يمينه واللي تحته.</p>
+<pre>int diffRight = abs(current - rightNeighbor);
+int diffDown = abs(current - downNeighbor);
+int finalValue =
+    (diffRight > threshold || diffDown > threshold) ? 255 : 0;</pre>
+<p>الـ <code>threshold</code> عندنا 30. لو الفرق في أي اتجاه أكبر من 30، البكسل يبقى أبيض؛ غير كده يبقى أسود.</p>
+<p class="example">مثال: شدة البكسل 100 واللي جنبه 160، الفرق 60؛ يبقى البكسل أبيض.</p>
+<div class="answer"><b>تقول للدكتور:</b> «بكتشف التغير الحاد في درجات الرمادي عن طريق فرق الشدة بين الجيران، وبحوّل النتيجة لأبيض أو أسود».</div>
+<p class="muted">ده أسلوب بسيط، مش Sobel ولا Canny. آخر صف وآخر عمود مش بيتحسبوا في اللوب، فممكن يفضلوا بألوانهم القديمة.</p>
+</section>
+
+<section class="filter" data-search="11 12 crop قص منطقة x y width height">
+<h2>فلتر 11 — Crop <span class="label">قص جزء من الصورة</span></h2>
+<p>المستخدم بيدخل أربع قيم: <code>x</code> و<code>y</code> مكان بداية القص، و<code>w</code> و<code>h</code> عرض وارتفاع الجزء المطلوب.</p>
+<pre>cropped.setPixel(i, j, k,
+                 img.getPixel(x + i, y + j, k));</pre>
+<p>يعني البكسل <code>(i,j)</code> في الصورة الجديدة بياخد لونه من <code>(x+i,y+j)</code> في الصورة الأصلية. والكود بيتأكد إن منطقة القص جوه حدود الصورة وإن العرض والارتفاع أكبر من صفر.</p>
+<div class="answer"><b>تقول للدكتور:</b> «بعمل صورة جديدة بحجم الجزء اللي المستخدم اختاره، وبنسخ البكسلات من المنطقة دي بعد ما أتأكد إن الإحداثيات صحيحة».</div>
+<p class="muted">ملاحظة في main: اختيار Crop مش بيحدّث المتغيرين filtered وsaved، فحالة الحفظ ممكن متتعاملش مع القص زي باقي الفلاتر.</p>
+</section>
+
+<section class="filter" data-search="12 13 blur تمويه average filter buffer">
+<h2>فلتر 12 — Blur <span class="label">تمويه الصورة</span></h2>
+<p><b>الفكرة:</b> لكل بكسل، بنبص على المنطقة حواليه بحجم 3×3، نجمع قيم كل قناة من البكسلات المتاحة، ونقسم على عددها. الكود بيكرر العملية 8 مرات.</p>
+<pre>for (int dj = -1; dj <= 1; ++dj)
+    for (int di = -1; di <= 1; ++di) {
+        int ni = i + di, nj = j + dj;
+        if (ni >= 0 && ni < w && nj >= 0 && nj < h) {
+            sum += buf[(nj * w + ni) * 3 + k];
+            count++;
+        }
+    }
+img.setPixel(i, j, k, sum / count);</pre>
+<p class="example">مثال لقيم قناة في 9 بكسلات: 100، 110، 120، 130، 140، 150، 160، 170، 180. المتوسط = 140.</p>
+<p><b>ليه فيه Buffer؟</b> عشان حسابات كل دورة تقرأ من نسخة ثابتة، بدل ما تتأثر بالبكسلات اللي اتعدلت قبلها في نفس الدورة.</p>
+<div class="answer"><b>تقول للدكتور:</b> «ده Mean Filter؛ ببدّل قيمة كل قناة بمتوسط القناة نفسها في الجيران داخل نافذة 3×3، وبكرر العملية 8 مرات عشان التمويه يزيد».</div>
+</section>
+
+<section class="filter" data-search="13 14 wano sunlight شمس دافئ">
+<h2>فلتر 13 — Wano Sunlight <span class="label">إضاءة دافئة</span></h2>
+<p>بيزوّد الأحمر والأخضر، ويقلل الأزرق، فالصورة تميل للأصفر والبرتقالي.</p>
+<pre>R = min(255, R + 50);
+G = min(255, G + 20);
+B = max(0, B - 30);</pre>
+<p class="example">مثال: (100,100,100) → (150,120,70)</p>
+<div class="answer"><b>تقول للدكتور:</b> «بضيف قيم ثابتة للأحمر والأخضر وبقلل الأزرق عشان أعمل Color Tint دافئ، مع الحفاظ على القيم بين 0 و255».</div>
+</section>
+
+<section class="filter" data-search="14 15 den den mushi noise تشويش خطوط rand">
+<h2>فلتر 14 — Den Den Mushi <span class="label">تشويش وخطوط</span></h2>
+<p><b>أول حاجة:</b> بنضيف رقم عشوائي لكل قناة، من -15 لحد +15.</p>
+<pre>int noise = (rand() % 31) - 15;
+value += noise;</pre>
+<p><b>تاني حاجة:</b> لو رقم الصف زوجي، بنضرب قيمة القناة في 0.7، يعني بنقللها حوالي 30%.</p>
+<pre>if (y % 2 == 0)
+    value = (int)(value * 0.7);</pre>
+<p>بعد كده بنحصر القيمة بين 0 و255 عشان متبقاش سالبة أو أكبر من الحد المسموح.</p>
+<div class="answer"><b>تقول للدكتور:</b> «بضيف Random Noise لكل قناة، وبعدها بغمّق الصفوف الزوجية، فبيطلع تأثير فيه تشويش وخطوط أفقية».</div>
+<p class="muted">في الكود المعروض مفيش srand، فممكن تسلسل الأرقام العشوائية يتكرر من تشغيل للتاني حسب بيئة التنفيذ.</p>
+</section>
+
+<section class="filter" data-search="15 16 wano purple بنفسجي">
+<h2>فلتر 15 — Wano Purple <span class="label">صبغة بنفسجي</span></h2>
+<p>بيزود الأحمر 40 والأزرق 60، وبيسيب الأخضر زي ما هو.</p>
+<pre>R = min(255, R + 40);
+B = min(255, B + 60);
+// G مش بيتغير</pre>
+<p class="example">مثال: (100,120,80) → (140,120,140)</p>
+<div class="answer"><b>تقول للدكتور:</b> «بزود قناتي الأحمر والأزرق بمقدارين مختلفين، وبسيب الأخضر ثابت، فالصورة تميل للبنفسجي».</div>
+</section>
+
+<section class="filter" data-search="16 17 infrared أشعة تحت الحمراء invert">
+<h2>فلتر 16 — Infrared <span class="label">تأثير مستوحى من الأشعة</span></h2>
+<p>عندنا مرحلتين: الأول بنعكس كل قناة، وبعدها بنزود الأحمر 40 والأزرق 60.</p>
+<pre>channel = 255 - channel; // الأول: عكس الألوان
+R = min(255, R + 40);   // بعد العكس
+B = min(255, B + 60);   // بعد العكس</pre>
+<p class="example">مثال: (100,150,200) → بعد العكس (155,105,55) → النتيجة (195,105,115)</p>
+<div class="answer"><b>تقول للدكتور:</b> «بعمل Invert لكل قنوات RGB الأول، وبعدها بضيف صبغة بزيادة الأحمر والأزرق. ده تأثير لوني تقريبي، مش قياس حقيقي للأشعة تحت الحمراء».</div>
+</section>
+
+<section class="filter" data-search="17 18 skew إمالة tan radians">
+<h2>فلتر 17 — Skew <span class="label">إمالة الصورة</span></h2>
+<p>بيحرّك الصفوف أفقيًا بمقادير مختلفة، فالصورة شكلها يميل. الأول بيحوّل الزاوية من درجات لراديان، وبعدين بيحسب ظل الزاوية.</p>
+<pre>double rad = degree * acos(-1.0) / 180.0;
+double skewFactor = tan(rad);
+int shift = (oldHeight - 1 - j) * skewFactor;
+int newX = i + shift;</pre>
+<p>كل صف بياخد إزاحة أفقية حسب مكانه الرأسي. الصورة الجديدة بتتملي أبيض، وبعدها البكسلات بتتنقل لمواقعها الجديدة.</p>
+<div class="answer"><b>تقول للدكتور:</b> «بستخدم تحويل هندسي للإحداثيات، والإزاحة الأفقية بتعتمد على ارتفاع الصف وظل زاوية الميل، وبنقل البكسلات للصورة الجديدة».</div>
+<p class="muted">ملحوظة: الزوايا القريبة من 90 درجة ممكن تعمل إزاحة ضخمة بسبب tan، والزوايا السالبة ممكن تخلي بكسلات تقع خارج الحدود وتتقص.</p>
+</section>
+
+<section class="filter" data-search="18 19 oil painting رسم زيتي levels radius">
+<h2>فلتر 18 — Oil Painting <span class="label">تأثير الرسم الزيتي</span></h2>
+<p>بدل ما ياخد متوسط كل الجيران وخلاص، بيقسمهم لمجموعات حسب درجة الإضاءة، ويختار أكتر مجموعة متكررة حوالين البكسل.</p>
+<div class="grid">
+<div class="tile"><b>1. منطقة الجيران</b><p>الـ <code>radius = 3</code>، يعني نافذة أقصاها 7×7 = 49 بكسل.</p></div>
+<div class="tile"><b>2. مستويات الإضاءة</b><p><code>levels = 8</code>، بنقسم شدة الرمادي إلى 8 مجموعات من 0 لـ7.</p></div>
+</div>
+<pre>int value = ((r + g + b) / 3) * levels / 256;
+c[value]++;
+sumR[value] += r;
+sumG[value] += g;
+sumB[value] += b;</pre>
+<p>بعد ما يعدّ عدد البكسلات في كل مستوى، بيختار المستوى اللي فيه أكبر عدد، وبعدها يحسب متوسط R وG وB للمجموعة دي ويحطهم لون جديد للبكسل.</p>
+<div class="answer"><b>تقول للدكتور:</b> «بقسم الجيران لـ8 مستويات حسب شدة الإضاءة، وبختار المستوى الأكثر تكرارًا، وبعدها بستخدم متوسط ألوانه كلون جديد للبكسل؛ وده بيدي شكل قريب من الرسم الزيتي».</div>
+</section>
+
+<section class="panel">
+<h2>ملخص سريع قبل ما تدخل</h2>
+<div class="tablewrap"><table>
+<thead><tr><th>الفلتر</th><th>فكرته في سطر</th></tr></thead>
+<tbody>
+<tr><td>Grayscale</td><td>متوسط RGB وتوحيد القنوات.</td></tr>
+<tr><td>Black and White</td><td>Threshold: يا 0 يا 255.</td></tr>
+<tr><td>Invert</td><td>كل قناة = 255 ناقص قيمتها.</td></tr>
+<tr><td>Frame</td><td>صورة أكبر بخلفية وإطار.</td></tr>
+<tr><td>Flip</td><td>تبديل أماكن البكسلات المتقابلة.</td></tr>
+<tr><td>Rotate</td><td>تغيير إحداثيات كل بكسل.</td></tr>
+<tr><td>Darken / Lighten</td><td>ضرب قيمة القناة في 0.5 أو 1.5.</td></tr>
+<tr><td>Resize</td><td>اختيار بكسل من الصورة الأصلية لكل بكسل جديد.</td></tr>
+<tr><td>Merge</td><td>متوسط قنوات الصورتين.</td></tr>
+<tr><td>Image Edges</td><td>مقارنة فرق الشدة مع الجيران.</td></tr>
+<tr><td>Crop</td><td>نسخ منطقة محددة لصورة جديدة.</td></tr>
+<tr><td>Blur</td><td>متوسط الجيران 3×3 وتكراره 8 مرات.</td></tr>
+<tr><td>Wano Sunlight</td><td>R +50، G +20، B -30.</td></tr>
+<tr><td>Den Den Mushi</td><td>Noise من -15 لـ15 وتعتيم الصفوف الزوجية.</td></tr>
+<tr><td>Wano Purple</td><td>R +40 وB +60.</td></tr>
+<tr><td>Infrared</td><td>Invert وبعده زيادة R وB.</td></tr>
+<tr><td>Skew</td><td>إزاحة أفقية حسب مكان الصف وزاوية الميل.</td></tr>
+<tr><td>Oil Painting</td><td>اختيار مستوى الإضاءة الأكثر تكرارًا بين الجيران.</td></tr>
+</tbody></table></div>
+</section>
+
+<section class="panel">
+<h2>أسئلة الدكتور المتوقعة</h2>
+<details><summary>إيه الفرق بين getPixel وsetPixel؟</summary><p><code>getPixel</code> بتقرأ قيمة قناة لونية عند إحداثيات معينة، و<code>setPixel</code> بتكتب قيمة جديدة في القناة دي.</p></details>
+<details><summary>ليه القيم من 0 لـ255؟</summary><p>لأن كل قناة في صورة 8-bit بتقدر تمثل 256 قيمة، من 0 لحد 255.</p></details>
+<details><summary>ليه بنستخدم صورة جديدة في Rotate وResize وCrop؟</summary><p>عشان الأبعاد أو أماكن البكسلات بتتغير، والصورة الجديدة بتخلينا ننقل القيم من الأصل من غير ما نكتب فوق بيانات لسه محتاجينها.</p></details>
+<details><summary>إيه الفرق بين Blur وOil Painting؟</summary><p>Blur بياخد متوسط قيم الجيران مباشرة، لكن Oil Painting بيصنفهم حسب شدة الإضاءة ويختار المجموعة الأكثر تكرارًا.</p></details>
+<details><summary>يعني إيه Clamping؟</summary><p>إننا نحصر القيمة بين أقل قيمة 0 وأكبر قيمة 255، زي <code>min(255, value)</code> أو <code>max(0, value)</code>.</p></details>
+<details><summary>هل Infrared في الكود محاكاة حقيقية للأشعة تحت الحمراء؟</summary><p>لأ؛ ده تأثير لوني معمول بعكس الألوان وبعدها تعديل الأحمر والأزرق. مش قراءة فعلية للأشعة تحت الحمراء.</p></details>
+</section>
+<footer>M AI</footer>
+</main>
+<script>
+const search=document.getElementById('search');
+const sections=[...document.querySelectorAll('.filter')];
+search.addEventListener('input',()=>{
+ const q=search.value.trim().toLowerCase();
+ sections.forEach(s=>s.hidden=!s.dataset.search.toLowerCase().includes(q) && !s.innerText.toLowerCase().includes(q));
+});
+document.getElementById('openAll').addEventListener('click',()=>document.querySelectorAll('details').forEach(d=>d.open=true));
+document.getElementById('closeAll').addEventListener('click',()=>document.querySelectorAll('details').forEach(d=>d.open=false));
+</script>
+</body>
+</html>
